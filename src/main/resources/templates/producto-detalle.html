@@ -15,9 +15,11 @@
     <div class="split-layout">
         <section>
             <div class="detail-image">
-                <img th:if="${!#lists.isEmpty(fotos)}"
-                     th:src="${fotos[0].url()}" th:alt="${producto.nombre()}">
-                <span th:if="${#lists.isEmpty(fotos)}" aria-hidden="true">✦</span>
+                <img th:if="${!#lists.isEmpty(fotos)}" th:src="${fotos[0].url()}"
+                     th:alt="${producto.nombre()}"
+                     onerror="this.hidden=true; this.nextElementSibling.hidden=false">
+                <span aria-hidden="true" class="image-fallback"
+                      th:hidden="${!#lists.isEmpty(fotos)}">📷<small>Foto no disponible</small></span>
             </div>
             <div class="content-card" style="margin-top:1rem">
                 <span class="badge">Producto local</span>

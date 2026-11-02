@@ -49,7 +49,7 @@ public class MarketplaceMvcController {
         if (rangoInvalido(precioMinimo, precioMaximo)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El rango de precios no es válido");
         }
-        model.addAttribute("productos", productoDAO.listarCatalogo(
+        model.addAttribute("productos", productoDAO.listarCatalogoConFotos(
                 texto,
                 categoriaId,
                 tiendaId,
@@ -88,7 +88,7 @@ public class MarketplaceMvcController {
                 .filter(item -> item.estado() == EstadoTienda.APROBADA)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         model.addAttribute("tienda", tienda);
-        model.addAttribute("productos", productoDAO.listarCatalogo(
+        model.addAttribute("productos", productoDAO.listarCatalogoConFotos(
                 null, null, tienda.id(), null, null, false
         ));
         return "tienda";

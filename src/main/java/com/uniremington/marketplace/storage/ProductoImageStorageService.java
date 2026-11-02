@@ -67,7 +67,8 @@ public class ProductoImageStorageService {
     }
 
     public String resourceLocation() {
-        return uploadDirectory.toUri().toString();
+        String location = uploadDirectory.toUri().toString();
+        return location.endsWith("/") ? location : location + "/";
     }
 
     private String validateImage(MultipartFile file) throws IOException {

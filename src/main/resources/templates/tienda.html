@@ -38,14 +38,20 @@
         </div>
         <p class="empty-state" th:if="${#lists.isEmpty(productos)}">Esta tienda aún no tiene productos publicados.</p>
         <div class="product-grid">
-            <article class="product-card" th:each="producto : ${productos}">
-                <a class="product-image" th:href="@{/productos/{id}(id=${producto.id()})}"
-                   aria-label="Ver detalle del producto"><span aria-hidden="true">✦</span></a>
+            <article class="product-card" th:each="item : ${productos}">
+                <a class="product-image" th:href="@{/productos/{id}(id=${item.producto().id()})}"
+                   aria-label="Ver detalle del producto">
+                    <img th:if="${item.fotoUrl() != null}" th:src="${item.fotoUrl()}"
+                         th:alt="${item.producto().nombre()}" loading="lazy"
+                         onerror="this.hidden=true; this.nextElementSibling.hidden=false">
+                    <span aria-hidden="true" class="image-fallback"
+                          th:hidden="${item.fotoUrl() != null}">📷<small>Foto no disponible</small></span>
+                </a>
                 <div class="product-body">
-                    <h3><a th:href="@{/productos/{id}(id=${producto.id()})}"
-                           th:text="${producto.nombre()}">Producto</a></h3>
-                    <p th:text="${producto.descripcion()}"></p>
-                    <span class="price" th:text="|$${producto.precio()}|">$0</span>
+                    <h3><a th:href="@{/productos/{id}(id=${item.producto().id()})}"
+                           th:text="${item.producto().nombre()}">Producto</a></h3>
+                    <p th:text="${item.producto().descripcion()}"></p>
+                    <span class="price" th:text="|$${item.producto().precio()}|">$0</span>
                 </div>
             </article>
         </div>

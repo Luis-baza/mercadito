@@ -10,7 +10,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @Repository
@@ -30,7 +32,14 @@ public class FotoProductoDAO {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    @Transactional
     public Long crear(FotoProductoVO foto) {
+        if (foto.principal()) {
+            jdbcTemplate.update(
+                    "UPDATE fotos_productos SET principal = FALSE WHERE producto_id = ?",
+                    foto.productoId()
+            );
+        }
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement statement = connection.prepareStatement(
@@ -47,9 +56,46 @@ public class FotoProductoDAO {
 
     public List<FotoProductoVO> listarPorProducto(Long productoId) {
         return jdbcTemplate.query(
-                "SELECT * FROM fotos_productos WHERE producto_id = ? ORDER BY principal DESC, id",
+                """
+                SELECT *
+                FROM fotos_productos
+                WHERE producto_id = ?
+                  AND LOWER(url) NOT LIKE '%placehold.co/%'
+                  AND LOWER(url) NOT LIKE '%via.placeholder.com/%'
+                ORDER BY principal DESC, id
+                """,
                 rowMapper,
                 productoId
+        );
+    }
+
+    public Map<Long, String> listarFotosPrincipalesPorTienda(Long tiendaId) {
+        return jdbcTemplate.query(
+                """
+                SELECT p.id AS producto_id,
+                       (
+                           SELECT fp.url
+                           FROM fotos_productos fp
+                           WHERE fp.producto_id = p.id
+                             AND LOWER(fp.url) NOT LIKE '%placehold.co/%'
+                             AND LOWER(fp.url) NOT LIKE '%via.placeholder.com/%'
+                           ORDER BY fp.principal DESC, fp.id
+                           LIMIT 1
+                       ) AS foto_url
+                FROM productos p
+                WHERE p.tienda_id = ?
+                """,
+                resultSet -> {
+                    Map<Long, String> fotosPorProducto = new LinkedHashMap<>();
+                    while (resultSet.next()) {
+                        fotosPorProducto.put(
+                                resultSet.getLong("producto_id"),
+                                resultSet.getString("foto_url")
+                        );
+                    }
+                    return fotosPorProducto;
+                },
+                tiendaId
         );
     }
 

@@ -88,13 +88,66 @@ public class ProductoDAO {
             java.math.BigDecimal precioMaximo,
             boolean ordenarPorPrecioAscendente
     ) {
+        List<Object> parametros = new ArrayList<>();
+        StringBuilder sql = crearConsultaCatalogo("p.*", texto, categoriaId, tiendaId,
+                precioMinimo, precioMaximo, ordenarPorPrecioAscendente, parametros);
+        return jdbcTemplate.query(sql.toString(), rowMapper, parametros.toArray());
+    }
+
+    public List<com.uniremington.marketplace.model.vo.ProductoCatalogoVO> listarCatalogoConFotos(
+            String texto,
+            Long categoriaId,
+            Long tiendaId,
+            java.math.BigDecimal precioMinimo,
+            java.math.BigDecimal precioMaximo,
+            boolean ordenarPorPrecioAscendente
+    ) {
+        List<Object> parametros = new ArrayList<>();
+        String select = """
+                p.*,
+                (
+                    SELECT fp.url
+                    FROM fotos_productos fp
+                    WHERE fp.producto_id = p.id
+                      AND LOWER(fp.url) NOT LIKE '%placehold.co/%'
+                      AND LOWER(fp.url) NOT LIKE '%via.placeholder.com/%'
+                    ORDER BY fp.principal DESC, fp.id
+                    LIMIT 1
+                ) AS foto_url
+                """;
+        StringBuilder sql = crearConsultaCatalogo(
+                select,
+                texto,
+                categoriaId,
+                tiendaId,
+                precioMinimo,
+                precioMaximo,
+                ordenarPorPrecioAscendente,
+                parametros
+        );
+        return jdbcTemplate.query(sql.toString(), (resultSet, rowNumber) ->
+                new com.uniremington.marketplace.model.vo.ProductoCatalogoVO(
+                        rowMapper.mapRow(resultSet, rowNumber),
+                        resultSet.getString("foto_url")
+                ), parametros.toArray());
+    }
+
+    private StringBuilder crearConsultaCatalogo(
+            String columnas,
+            String texto,
+            Long categoriaId,
+            Long tiendaId,
+            java.math.BigDecimal precioMinimo,
+            java.math.BigDecimal precioMaximo,
+            boolean ordenarPorPrecioAscendente,
+            List<Object> parametros
+    ) {
         StringBuilder sql = new StringBuilder("""
-                SELECT p.*
+                SELECT %s
                 FROM productos p
                 JOIN tiendas t ON t.id = p.tienda_id
                 WHERE p.estado = 'publicado' AND t.estado = 'aprobada'
-                """);
-        List<Object> parametros = new ArrayList<>();
+                """.formatted(columnas));
 
         if (texto != null && !texto.isBlank()) {
             sql.append(" AND (p.nombre LIKE ? OR p.descripcion LIKE ?)");
@@ -120,7 +173,7 @@ public class ProductoDAO {
         }
 
         sql.append(ordenarPorPrecioAscendente ? " ORDER BY p.precio ASC" : " ORDER BY p.creado_en DESC");
-        return jdbcTemplate.query(sql.toString(), rowMapper, parametros.toArray());
+        return sql;
     }
 
     public List<ProductoVO> listarPorTienda(Long tiendaId) {

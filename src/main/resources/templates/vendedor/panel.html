@@ -142,6 +142,10 @@
             <div class="stack" th:each="producto : ${productos}">
                 <article class="content-card">
                     <div class="section-heading" style="margin-top:0">
+                        <img th:if="${fotosPrincipales[producto.id()] != null}"
+                             th:src="${fotosPrincipales[producto.id()]}"
+                             th:alt="${producto.nombre()}"
+                             style="width:92px;height:76px;object-fit:cover;border-radius:12px">
                         <div>
                             <h3 th:text="${producto.nombre()}">Producto</h3>
                             <p class="muted" th:text="|$${producto.precio()} · ${producto.disponibilidad()}|"></p>

@@ -69,20 +69,24 @@
             No encontramos productos con esos filtros. Prueba otra búsqueda.
         </p>
         <div class="product-grid">
-            <article class="product-card" th:each="producto : ${productos}">
-                <a class="product-image" th:href="@{/productos/{id}(id=${producto.id()})}"
+            <article class="product-card" th:each="item : ${productos}">
+                <a class="product-image" th:href="@{/productos/{id}(id=${item.producto().id()})}"
                    aria-label="Ver detalle del producto">
-                    <span aria-hidden="true">✦</span>
+                    <img th:if="${item.fotoUrl() != null}" th:src="${item.fotoUrl()}"
+                         th:alt="${item.producto().nombre()}" loading="lazy"
+                         onerror="this.hidden=true; this.nextElementSibling.hidden=false">
+                    <span aria-hidden="true" class="image-fallback"
+                          th:hidden="${item.fotoUrl() != null}">📷<small>Foto no disponible</small></span>
                 </a>
                 <div class="product-body">
                     <span class="badge">Tienda local</span>
-                    <h3><a th:href="@{/productos/{id}(id=${producto.id()})}"
-                           th:text="${producto.nombre()}">Producto</a></h3>
-                    <p th:text="${producto.descripcion()}">Descripción</p>
+                    <h3><a th:href="@{/productos/{id}(id=${item.producto().id()})}"
+                           th:text="${item.producto().nombre()}">Producto</a></h3>
+                    <p th:text="${item.producto().descripcion()}">Descripción</p>
                     <div class="product-meta">
-                        <span class="price" th:text="|$${producto.precio()}|">$0</span>
+                        <span class="price" th:text="|$${item.producto().precio()}|">$0</span>
                         <a class="button button-secondary button-small"
-                           th:href="@{/tiendas/{id}(id=${producto.tiendaId()})}">Ver tienda</a>
+                           th:href="@{/tiendas/{id}(id=${item.producto().tiendaId()})}">Ver tienda</a>
                     </div>
                 </div>
             </article>

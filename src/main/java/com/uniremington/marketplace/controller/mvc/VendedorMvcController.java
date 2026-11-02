@@ -72,6 +72,9 @@ public class VendedorMvcController {
         model.addAttribute("productos", tienda == null
                 ? java.util.List.of()
                 : productoDAO.listarPorTienda(tienda.id()));
+        model.addAttribute("fotosPrincipales", tienda == null
+                ? java.util.Map.of()
+                : fotoProductoDAO.listarFotosPrincipalesPorTienda(tienda.id()));
         model.addAttribute("categorias", categoriaDAO.listar());
         model.addAttribute("nuevoProducto", tienda != null);
         return "vendedor/panel";
@@ -192,7 +195,7 @@ public class VendedorMvcController {
                 existente.creadoEn(),
                 existente.actualizadoEn()
         ));
-        guardarFoto(id, foto, fotoUrl, false);
+        guardarFoto(id, foto, fotoUrl, true);
         redirectAttributes.addFlashAttribute("mensaje", "Producto actualizado.");
         return "redirect:/vendedor/panel";
     }
