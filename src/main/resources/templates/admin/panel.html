@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#172554">
+    <title>Administración - Mercadito</title>
+    <link rel="stylesheet" th:href="@{/css/marketplace.css}">
+    <script defer th:src="@{/js/marketplace.js}"></script>
+</head>
+<body>
+<header th:replace="~{fragments/layout :: header('admin')}"></header>
+<main class="page-shell">
+    <section class="dashboard-hero">
+        <div>
+            <span class="eyebrow">Centro de control</span>
+            <h1>Panel de administración</h1>
+            <p>Revisa tiendas y productos para mantener el catálogo de confianza.</p>
+        </div>
+        <span aria-hidden="true" style="font-size:3.5rem">🛡️</span>
+    </section>
+    <div class="alert alert-success" th:if="${mensaje}" th:text="${mensaje}" role="status"></div>
+    <div class="dashboard-grid">
+        <article class="stat-card">
+            <strong th:text="${#lists.size(tiendasPendientes)}">0</strong>
+            <span>Tiendas pendientes</span>
+        </article>
+        <article class="stat-card">
+            <strong th:text="${#lists.size(productosPendientes)}">0</strong>
+            <span>Productos por revisar</span>
+        </article>
+    </div>
+
+    <section class="panel" style="margin-bottom:1rem">
+        <div class="section-heading" style="margin-top:0">
+            <div><span class="eyebrow">Solicitud de vendedores</span><h2>Tiendas por aprobar</h2></div>
+        </div>
+        <p class="empty-state" th:if="${#lists.isEmpty(tiendasPendientes)}">No hay tiendas pendientes. ¡Todo al día!</p>
+        <div class="table-wrap" th:unless="${#lists.isEmpty(tiendasPendientes)}">
+            <table>
+                <thead><tr><th>Tienda</th><th>Contacto</th><th>Descripción</th><th>Revisión</th></tr></thead>
+                <tbody>
+                <tr th:each="tienda : ${tiendasPendientes}">
+                    <td><strong th:text="${tienda.nombre()}"></strong></td>
+                    <td>
+                        <span th:text="${tienda.correoContacto()}"></span><br>
+                        <span class="muted" th:text="${tienda.whatsapp()}"></span>
+                    </td>
+                    <td th:text="${tienda.descripcion()}"></td>
+                    <td>
+                        <div class="row-actions">
+                            <form th:action="@{/admin/tiendas/{id}/estado(id=${tienda.id()})}" method="post">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                <input type="hidden" name="estado" value="APROBADA">
+                                <button class="button-small" type="submit">Aprobar</button>
+                            </form>
+                            <form th:action="@{/admin/tiendas/{id}/estado(id=${tienda.id()})}" method="post">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                <input type="hidden" name="estado" value="RECHAZADA">
+                                <button class="button-danger button-small" type="submit">Rechazar</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="panel" style="margin-bottom:1rem">
+        <div class="section-heading" style="margin-top:0">
+            <div><span class="eyebrow">Moderación</span><h2>Productos por revisar</h2></div>
+        </div>
+        <p class="empty-state" th:if="${#lists.isEmpty(productosPendientes)}">No hay productos pendientes.</p>
+        <div class="table-wrap" th:unless="${#lists.isEmpty(productosPendientes)}">
+            <table>
+                <thead><tr><th>Producto</th><th>Precio</th><th>Descripción</th><th>Decisión</th></tr></thead>
+                <tbody>
+                <tr th:each="producto : ${productosPendientes}">
+                    <td><strong th:text="${producto.nombre()}"></strong></td>
+                    <td th:text="|$${producto.precio()}|"></td>
+                    <td th:text="${producto.descripcion()}"></td>
+                    <td>
+                        <div class="row-actions">
+                            <form th:action="@{/admin/productos/{id}/estado(id=${producto.id()})}" method="post">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                <input type="hidden" name="estado" value="PUBLICADO">
+                                <button class="button-small" type="submit">Publicar</button>
+                            </form>
+                            <form th:action="@{/admin/productos/{id}/estado(id=${producto.id()})}" method="post">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                <input type="hidden" name="estado" value="RECHAZADO">
+                                <button class="button-danger button-small" type="submit">Rechazar</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="panel">
+        <div class="section-heading" style="margin-top:0">
+            <div><span class="eyebrow">Acceso a la plataforma</span><h2>Usuarios</h2></div>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Cuenta</th><th>Acción</th></tr></thead>
+                <tbody>
+                <tr th:each="usuario : ${usuarios}">
+                    <td th:text="${usuario.nombre()}"></td>
+                    <td th:text="${usuario.correo()}"></td>
+                    <td><span class="badge badge-neutral" th:text="${usuario.rol()}"></span></td>
+                    <td>
+                        <span class="badge" th:if="${usuario.activo()}">Activa</span>
+                        <span class="badge badge-rejected" th:unless="${usuario.activo()}">Desactivada</span>
+                    </td>
+                    <td>
+                        <form th:if="${usuario.rol().name() != 'ADMINISTRADOR'}"
+                              th:action="@{/admin/usuarios/{id}/activo(id=${usuario.id()})}"
+                              method="post"
+                              th:attr="data-confirm=${usuario.activo() ? '¿Desactivar esta cuenta?' : '¿Activar esta cuenta?'}">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                            <input type="hidden" name="activo" th:value="${!usuario.activo()}">
+                            <button class="button-secondary button-small" type="submit"
+                                    th:text="${usuario.activo() ? 'Desactivar' : 'Activar'}">Cambiar estado</button>
+                        </form>
+                        <span class="muted" th:if="${usuario.rol().name() == 'ADMINISTRADOR'}">Administrador</span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

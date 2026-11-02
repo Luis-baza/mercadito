@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#172554">
+    <title th:text="|${producto.nombre()} - Mercadito|">Detalle del producto</title>
+    <link rel="stylesheet" th:href="@{/css/marketplace.css}">
+    <script defer th:src="@{/js/marketplace.js}"></script>
+</head>
+<body>
+<header th:replace="~{fragments/layout :: header('producto')}"></header>
+<main class="page-shell">
+    <p><a th:href="@{/catalogo}">← Volver a explorar</a></p>
+    <div class="split-layout">
+        <section>
+            <div class="detail-image">
+                <img th:if="${!#lists.isEmpty(fotos)}"
+                     th:src="${fotos[0].url()}" th:alt="${producto.nombre()}">
+                <span th:if="${#lists.isEmpty(fotos)}" aria-hidden="true">✦</span>
+            </div>
+            <div class="content-card" style="margin-top:1rem">
+                <span class="badge">Producto local</span>
+                <h1 th:text="${producto.nombre()}">Producto</h1>
+                <p class="muted" th:text="${producto.descripcion()}"></p>
+                <p class="detail-price" th:text="|$${producto.precio()}|">$0</p>
+                <span class="badge" th:text="${producto.disponibilidad()}">Disponible</span>
+                <div th:if="${#lists.size(fotos) > 1}" style="display:flex;gap:.6rem;margin-top:1rem">
+                    <img th:each="foto : ${fotos}" th:src="${foto.url()}" th:alt="${producto.nombre()}"
+                         width="78" height="70" style="object-fit:cover;border-radius:12px">
+                </div>
+            </div>
+        </section>
+        <aside class="panel contact-card">
+            <span class="eyebrow">Vendedor</span>
+            <h2 th:text="${tienda.nombre()}">Tienda</h2>
+            <p class="muted" th:text="${tienda.descripcion()}"></p>
+            <p><a th:href="@{/tiendas/{id}(id=${tienda.id()})}">Conoce la tienda →</a></p>
+            <p class="muted">Coordina disponibilidad, pago y entrega directamente con la tienda.</p>
+            <a class="contact-link" th:if="${tienda.whatsapp() != null}"
+               th:href="|https://wa.me/${tienda.whatsapp()}|" target="_blank" rel="noopener">
+                Escribir por WhatsApp
+            </a>
+            <a class="contact-link" style="background:#253b74"
+               th:if="${tienda.correoContacto() != null}"
+               th:href="|mailto:${tienda.correoContacto()}|">Enviar correo</a>
+        </aside>
+    </div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<header th:fragment="header(activePage)" class="site-header">
+    <a class="brand" th:href="@{/catalogo}">
+        <span class="brand-mark" aria-hidden="true">M</span>
+        <span>Mercadito<span style="color:#ff6b5e">.</span></span>
+    </a>
+    <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false"
+            aria-controls="primary-navigation" aria-label="Abrir menú">Menú</button>
+    <nav id="primary-navigation" class="site-nav" data-site-nav aria-label="Navegación principal">
+        <a th:href="@{/catalogo}" th:aria-current="${activePage == 'catalogo' ? 'page' : null}">Explorar</a>
+        <a sec:authorize="hasRole('VENDEDOR')" th:href="@{/vendedor/panel}">Mi tienda</a>
+        <a sec:authorize="hasRole('ADMINISTRADOR')" th:href="@{/admin/panel}">Administración</a>
+    </nav>
+    <div class="nav-actions">
+        <a sec:authorize="isAnonymous()" class="button button-secondary button-small"
+           th:href="@{/login}">Ingresar</a>
+        <a sec:authorize="isAnonymous()" class="button button-small"
+           th:href="@{/registro}">Vender</a>
+        <span sec:authorize="isAuthenticated()" class="muted" sec:authentication="name"></span>
+        <form sec:authorize="isAuthenticated()" th:action="@{/logout}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <button type="submit" class="link-button button-small">Salir</button>
+        </form>
+    </div>
+</header>
+
+<footer th:fragment="footer" class="site-footer">
+    <p><strong>Mercadito.</strong> Negocios locales, grandes hallazgos.</p>
+    <p>La compra se acuerda directamente con cada tienda.</p>
+</footer>
+</body>
+</html>

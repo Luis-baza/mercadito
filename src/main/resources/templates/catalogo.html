@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#172554">
+    <title>Mercadito - Encuentra algo especial</title>
+    <link rel="stylesheet" th:href="@{/css/marketplace.css}">
+    <script defer th:src="@{/js/marketplace.js}"></script>
+</head>
+<body>
+<header th:replace="~{fragments/layout :: header('catalogo')}"></header>
+<main class="page-shell">
+    <section class="hero">
+        <div>
+            <span class="eyebrow">Hecho cerca, elegido por ti</span>
+            <h1>Tu próximo favorito está a la vuelta.</h1>
+            <p>Explora productos de tiendas locales y habla directamente con quien los creó.</p>
+            <a class="button" href="#productos">Descubrir productos <span aria-hidden="true">↘</span></a>
+        </div>
+        <div class="hero-art" aria-hidden="true">🛍️</div>
+    </section>
+
+    <section class="toolbar" aria-label="Filtros del catálogo">
+        <form th:action="@{/catalogo}" method="get" class="search-grid">
+            <div class="field">
+                <label for="texto">¿Qué estás buscando?</label>
+                <input id="texto" type="search" name="texto" placeholder="Ej. bolso tejido"
+                       th:value="${texto}">
+            </div>
+            <div class="field">
+                <label for="categoriaId">Categoría</label>
+                <select id="categoriaId" name="categoriaId">
+                    <option value="">Todas</option>
+                    <option th:each="categoria : ${categorias}"
+                            th:value="${categoria.id()}"
+                            th:text="${categoria.nombre()}"
+                            th:selected="${categoria.id() == categoriaId}"></option>
+                </select>
+            </div>
+            <div class="field">
+                <label for="precioMinimo">Desde</label>
+                <input id="precioMinimo" type="number" step="0.01" min="0" name="precioMinimo"
+                       placeholder="$ mínimo" th:value="${precioMinimo}">
+            </div>
+            <div class="field">
+                <label for="precioMaximo">Hasta</label>
+                <input id="precioMaximo" type="number" step="0.01" min="0" name="precioMaximo"
+                       placeholder="$ máximo" th:value="${precioMaximo}">
+            </div>
+            <div class="field">
+                <label for="ordenar">Ordenar</label>
+                <select id="ordenar" name="ordenar">
+                    <option value="recientes" th:selected="${ordenar != 'precio'}">Novedades</option>
+                    <option value="precio" th:selected="${ordenar == 'precio'}">Menor precio</option>
+                </select>
+            </div>
+            <button type="submit">Buscar</button>
+        </form>
+    </section>
+
+    <section id="productos">
+        <div class="section-heading">
+            <div><span class="eyebrow">Selección local</span><h2>Productos para descubrir</h2></div>
+            <span class="muted" th:text="|${#lists.size(productos)} resultados|">Productos</span>
+        </div>
+        <p class="empty-state" th:if="${#lists.isEmpty(productos)}">
+            No encontramos productos con esos filtros. Prueba otra búsqueda.
+        </p>
+        <div class="product-grid">
+            <article class="product-card" th:each="producto : ${productos}">
+                <a class="product-image" th:href="@{/productos/{id}(id=${producto.id()})}"
+                   aria-label="Ver detalle del producto">
+                    <span aria-hidden="true">✦</span>
+                </a>
+                <div class="product-body">
+                    <span class="badge">Tienda local</span>
+                    <h3><a th:href="@{/productos/{id}(id=${producto.id()})}"
+                           th:text="${producto.nombre()}">Producto</a></h3>
+                    <p th:text="${producto.descripcion()}">Descripción</p>
+                    <div class="product-meta">
+                        <span class="price" th:text="|$${producto.precio()}|">$0</span>
+                        <a class="button button-secondary button-small"
+                           th:href="@{/tiendas/{id}(id=${producto.tiendaId()})}">Ver tienda</a>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </section>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

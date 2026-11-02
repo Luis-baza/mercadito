@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#172554">
+    <title>Mi tienda - Mercadito</title>
+    <link rel="stylesheet" th:href="@{/css/marketplace.css}">
+    <script defer th:src="@{/js/marketplace.js}"></script>
+</head>
+<body>
+<header th:replace="~{fragments/layout :: header('vendedor')}"></header>
+<main class="page-shell">
+    <section class="dashboard-hero">
+        <div>
+            <span class="eyebrow">Panel de vendedor</span>
+            <h1 th:text="|¡Hola, ${usuario.nombre()}!|">¡Hola!</h1>
+            <p>Tu espacio para mantener la vitrina al día.</p>
+        </div>
+        <a class="button" th:if="${tienda != null && tienda.estado().name() == 'APROBADA'}"
+           th:href="@{/tiendas/{id}(id=${tienda.id()})}">Ver mi tienda ↗</a>
+    </section>
+    <div class="alert alert-success" th:if="${mensaje}" th:text="${mensaje}" role="status"></div>
+    <div class="dashboard-grid">
+        <article class="stat-card">
+            <strong th:text="${tienda == null ? 'Aún no' : tienda.estado()}">Estado</strong>
+            <span>Estado de tu tienda</span>
+        </article>
+        <article class="stat-card">
+            <strong th:text="${#lists.size(productos)}">0</strong>
+            <span>Productos en tu panel</span>
+        </article>
+    </div>
+
+    <div class="stack">
+        <section class="panel">
+            <div class="section-heading" style="margin-top:0">
+                <div><span class="eyebrow">Tu vitrina</span><h2 th:text="${tienda == null ? 'Crea tu tienda' : 'Datos de la tienda'}">Tienda</h2></div>
+                <span th:if="${tienda != null}" class="badge"
+                      th:classappend="${tienda.estado().name() == 'PENDIENTE' ? ' badge-pending' : (tienda.estado().name() == 'RECHAZADA' || tienda.estado().name() == 'SUSPENDIDA' ? ' badge-rejected' : '')}"
+                      th:text="${tienda.estado()}">Pendiente</span>
+            </div>
+            <p class="muted" th:if="${tienda == null}">Completa estos datos. Un administrador revisará tu tienda antes de publicarla.</p>
+            <form th:action="@{/vendedor/tienda}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <div class="field">
+                    <label for="nombreTienda">Nombre de la tienda</label>
+                    <input id="nombreTienda" name="nombre" maxlength="120"
+                           th:value="${tienda == null ? '' : tienda.nombre()}" required>
+                </div>
+                <div class="field">
+                    <label for="descripcionTienda">Cuéntales qué haces</label>
+                    <textarea id="descripcionTienda" name="descripcion"
+                              th:text="${tienda == null ? '' : tienda.descripcion()}"></textarea>
+                </div>
+                <div class="dashboard-grid">
+                    <div class="field">
+                        <label for="telefono">Teléfono</label>
+                        <input id="telefono" name="telefono" type="tel" maxlength="30"
+                               th:value="${tienda == null ? '' : tienda.telefono()}">
+                    </div>
+                    <div class="field">
+                        <label for="whatsapp">WhatsApp con código de país</label>
+                        <input id="whatsapp" name="whatsapp" type="tel" maxlength="30"
+                               placeholder="573001234567"
+                               th:value="${tienda == null ? '' : tienda.whatsapp()}">
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="correoContacto">Correo para clientes</label>
+                    <input id="correoContacto" name="correoContacto" type="email" maxlength="150"
+                           th:value="${tienda == null ? '' : tienda.correoContacto()}">
+                </div>
+                <button type="submit" th:text="${tienda == null ? 'Enviar mi tienda a revisión' : 'Guardar cambios'}">
+                    Guardar tienda
+                </button>
+            </form>
+        </section>
+
+        <section class="panel" th:if="${nuevoProducto}">
+            <div class="section-heading" style="margin-top:0">
+                <div><span class="eyebrow">Catálogo</span><h2>Publicar un producto</h2></div>
+            </div>
+            <form th:action="@{/vendedor/productos}" method="post" enctype="multipart/form-data">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <div class="dashboard-grid">
+                    <div class="field">
+                        <label for="productoNombre">Nombre</label>
+                        <input id="productoNombre" name="nombre" maxlength="150" required>
+                    </div>
+                    <div class="field">
+                        <label for="productoCategoria">Categoría</label>
+                        <select id="productoCategoria" name="categoriaId">
+                            <option value="">Sin categoría</option>
+                            <option th:each="categoria : ${categorias}"
+                                    th:value="${categoria.id()}" th:text="${categoria.nombre()}"></option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="precio">Precio de referencia</label>
+                        <input id="precio" name="precio" type="number" step="0.01" min="0" required>
+                    </div>
+                    <div class="field">
+                        <label for="disponibilidad">Disponibilidad</label>
+                        <select id="disponibilidad" name="disponibilidad">
+                            <option value="DISPONIBLE">Disponible</option>
+                            <option value="NO_DISPONIBLE">No disponible</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="descripcion">Descripción</label>
+                    <textarea id="descripcion" name="descripcion" maxlength="5000"></textarea>
+                </div>
+                <div class="field">
+                    <label for="foto">Foto del producto</label>
+                    <input id="foto" name="foto" type="file" accept="image/jpeg,image/png,image/gif"
+                           data-image-input="preview-nuevo" aria-describedby="ayuda-foto">
+                    <small id="ayuda-foto" class="muted">Elige una imagen JPG, PNG o GIF de hasta 5 MB.</small>
+                    <img id="preview-nuevo" class="upload-preview" alt="Vista previa de la imagen seleccionada"
+                         hidden>
+                </div>
+                <details>
+                    <summary style="cursor:pointer;color:#172554;font-weight:750">O agregar una imagen mediante URL</summary>
+                    <div class="field" style="margin-top:.8rem">
+                        <label for="fotoUrl">URL de imagen (opcional)</label>
+                        <input id="fotoUrl" name="fotoUrl" type="url" maxlength="500"
+                               placeholder="https://...">
+                    </div>
+                </details>
+                <button type="submit">Enviar producto a revisión</button>
+            </form>
+        </section>
+
+        <section class="panel">
+            <div class="section-heading" style="margin-top:0">
+                <div><span class="eyebrow">Lo que ofreces</span><h2>Mis productos</h2></div>
+            </div>
+            <p class="empty-state" th:if="${#lists.isEmpty(productos)}">
+                Tus productos aparecerán aquí. Primero crea tu tienda.
+            </p>
+            <div class="stack" th:each="producto : ${productos}">
+                <article class="content-card">
+                    <div class="section-heading" style="margin-top:0">
+                        <div>
+                            <h3 th:text="${producto.nombre()}">Producto</h3>
+                            <p class="muted" th:text="|$${producto.precio()} · ${producto.disponibilidad()}|"></p>
+                        </div>
+                        <span class="badge"
+                              th:classappend="${producto.estado().name() == 'PENDIENTE' ? ' badge-pending' : (producto.estado().name() == 'RECHAZADO' || producto.estado().name() == 'RETIRADO' ? ' badge-rejected' : '')}"
+                              th:text="${producto.estado()}">Estado</span>
+                    </div>
+                    <details>
+                        <summary style="cursor:pointer;color:#172554;font-weight:800">Editar producto</summary>
+                        <form th:action="@{/vendedor/productos/{id}/editar(id=${producto.id()})}"
+                              method="post" enctype="multipart/form-data" style="margin-top:1rem">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                            <div class="dashboard-grid">
+                                <div class="field">
+                                    <label th:for="|nombre-${producto.id()}|">Nombre</label>
+                                    <input th:id="|nombre-${producto.id()}|" name="nombre"
+                                           th:value="${producto.nombre()}" maxlength="150" required>
+                                </div>
+                                <div class="field">
+                                    <label th:for="|categoria-${producto.id()}|">Categoría</label>
+                                    <select th:id="|categoria-${producto.id()}|" name="categoriaId">
+                                        <option value="">Sin categoría</option>
+                                        <option th:each="categoria : ${categorias}"
+                                                th:value="${categoria.id()}" th:text="${categoria.nombre()}"
+                                                th:selected="${categoria.id() == producto.categoriaId()}"></option>
+                                    </select>
+                                </div>
+                                <div class="field">
+                                    <label th:for="|precio-${producto.id()}|">Precio</label>
+                                    <input th:id="|precio-${producto.id()}|" name="precio" type="number"
+                                           min="0" step="0.01" th:value="${producto.precio()}" required>
+                                </div>
+                                <div class="field">
+                                    <label th:for="|disponibilidad-${producto.id()}|">Disponibilidad</label>
+                                    <select th:id="|disponibilidad-${producto.id()}|" name="disponibilidad">
+                                        <option value="DISPONIBLE"
+                                                th:selected="${producto.disponibilidad().name() == 'DISPONIBLE'}">Disponible</option>
+                                        <option value="NO_DISPONIBLE"
+                                                th:selected="${producto.disponibilidad().name() == 'NO_DISPONIBLE'}">No disponible</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="field">
+                                <label th:for="|descripcion-${producto.id()}|">Descripción</label>
+                                <textarea th:id="|descripcion-${producto.id()}|" name="descripcion"
+                                          th:text="${producto.descripcion()}"></textarea>
+                            </div>
+                            <div class="field">
+                                <label th:for="|foto-${producto.id()}|">Añadir foto desde tu equipo</label>
+                                <input th:id="|foto-${producto.id()}|" name="foto" type="file"
+                                       accept="image/jpeg,image/png,image/gif"
+                                       th:attr="data-image-input=|preview-${producto.id()}|">
+                                <small class="muted">JPG, PNG o GIF, hasta 5 MB.</small>
+                                <img th:id="|preview-${producto.id()}|" class="upload-preview"
+                                     alt="Vista previa de la imagen seleccionada" hidden>
+                            </div>
+                            <details>
+                                <summary style="cursor:pointer;color:#172554;font-weight:750">O agregar una imagen mediante URL</summary>
+                                <div class="field" style="margin-top:.8rem">
+                                    <label th:for="|fotoUrl-${producto.id()}|">URL de imagen (opcional)</label>
+                                    <input th:id="|fotoUrl-${producto.id()}|" name="fotoUrl"
+                                           type="url" maxlength="500">
+                                </div>
+                            </details>
+                            <button class="button-secondary" type="submit">Guardar cambios</button>
+                        </form>
+                    </details>
+                    <form th:if="${producto.estado().name() != 'RETIRADO'}"
+                          th:action="@{/vendedor/productos/{id}/retirar(id=${producto.id()})}"
+                          method="post" data-confirm="¿Retirar este producto del catálogo?"
+                          style="margin-top:.8rem">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                        <button class="button-danger button-small" type="submit">Retirar producto</button>
+                    </form>
+                </article>
+            </div>
+        </section>
+    </div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

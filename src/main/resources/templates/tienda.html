@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#172554">
+    <title th:text="|${tienda.nombre()} - Mercadito|">Perfil de tienda</title>
+    <link rel="stylesheet" th:href="@{/css/marketplace.css}">
+    <script defer th:src="@{/js/marketplace.js}"></script>
+</head>
+<body>
+<header th:replace="~{fragments/layout :: header('tienda')}"></header>
+<main class="page-shell">
+    <section class="hero" style="min-height:230px">
+        <div>
+            <span class="eyebrow">Una tienda de aquí</span>
+            <h1 th:text="${tienda.nombre()}">Tienda</h1>
+            <p th:text="${tienda.descripcion()}"></p>
+        </div>
+        <div class="hero-art" aria-hidden="true">🏪</div>
+    </section>
+    <section class="toolbar" style="display:flex;align-items:center;justify-content:space-between;gap:1rem">
+        <div>
+            <strong>¿Te interesa algo?</strong>
+            <p class="muted" style="margin:.2rem 0">Acuerda compra y entrega directamente con la tienda.</p>
+        </div>
+        <div style="display:flex;gap:.6rem;flex-wrap:wrap">
+            <a class="button" th:if="${tienda.whatsapp() != null}"
+               th:href="|https://wa.me/${tienda.whatsapp()}|" target="_blank" rel="noopener">WhatsApp</a>
+            <a class="button button-secondary" th:if="${tienda.correoContacto() != null}"
+               th:href="|mailto:${tienda.correoContacto()}|">Correo</a>
+        </div>
+    </section>
+    <section>
+        <div class="section-heading">
+            <div><span class="eyebrow">Hecho con intención</span><h2>Productos de la tienda</h2></div>
+            <span class="muted" th:text="|${#lists.size(productos)} productos|">Productos</span>
+        </div>
+        <p class="empty-state" th:if="${#lists.isEmpty(productos)}">Esta tienda aún no tiene productos publicados.</p>
+        <div class="product-grid">
+            <article class="product-card" th:each="producto : ${productos}">
+                <a class="product-image" th:href="@{/productos/{id}(id=${producto.id()})}"
+                   aria-label="Ver detalle del producto"><span aria-hidden="true">✦</span></a>
+                <div class="product-body">
+                    <h3><a th:href="@{/productos/{id}(id=${producto.id()})}"
+                           th:text="${producto.nombre()}">Producto</a></h3>
+                    <p th:text="${producto.descripcion()}"></p>
+                    <span class="price" th:text="|$${producto.precio()}|">$0</span>
+                </div>
+            </article>
+        </div>
+    </section>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

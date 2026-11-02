@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#172554">
+    <title>Abre tu tienda - Mercadito</title>
+    <link rel="stylesheet" th:href="@{/css/marketplace.css}">
+    <script defer th:src="@{/js/marketplace.js}"></script>
+</head>
+<body>
+<header th:replace="~{fragments/layout :: header('registro')}"></header>
+<main class="auth-shell">
+    <section class="auth-art">
+        <span class="eyebrow">Tu vitrina empieza aquí</span>
+        <h1>Lo que haces merece su propio escaparate.</h1>
+        <p>Crea tu cuenta de vendedor y presenta tus productos a nuevos clientes.</p>
+        <div class="illustration" aria-hidden="true">🎨</div>
+    </section>
+    <section class="auth-content">
+        <div class="form-card">
+            <span class="eyebrow">Registro gratuito</span>
+            <h2>Crea tu cuenta</h2>
+            <p>Luego podrás completar el perfil de tu tienda.</p>
+            <div class="alert" role="alert" th:if="${error}" th:text="${error}"></div>
+            <form th:action="@{/registro}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <div class="field">
+                    <label for="nombre">Tu nombre</label>
+                    <input id="nombre" name="nombre" type="text" maxlength="100"
+                           autocomplete="name" required>
+                </div>
+                <div class="field">
+                    <label for="correo">Correo electrónico</label>
+                    <input id="correo" name="correo" type="email" maxlength="150"
+                           autocomplete="email" placeholder="tu@correo.com" required>
+                </div>
+                <div class="field">
+                    <label for="password">Contraseña (mínimo 8 caracteres)</label>
+                    <div style="display:flex;gap:.45rem">
+                        <input id="password" name="password" type="password" minlength="8"
+                               autocomplete="new-password" required>
+                        <button class="button-secondary" type="button" data-password-toggle="password"
+                                aria-pressed="false">Mostrar</button>
+                    </div>
+                </div>
+                <button type="submit" style="width:100%;margin-top:.4rem">Crear mi cuenta</button>
+            </form>
+            <p class="auth-footer">¿Ya eres parte? <a th:href="@{/login}"><strong>Inicia sesión</strong></a></p>
+        </div>
+    </section>
+</main>
+</body>
+</html>
