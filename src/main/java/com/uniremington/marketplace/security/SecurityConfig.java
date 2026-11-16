@@ -83,6 +83,7 @@ public class SecurityConfig {
                                 "/css/**", "/js/**", "/images/**", "/uploads/**",
                                 "/favicon.ico").permitAll()
                         .requestMatchers("/", "/catalogo", "/productos/**", "/tiendas/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/chat/mensaje", "/chat/reiniciar").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMINISTRADOR")
                         .requestMatchers("/vendedor/**").hasRole("VENDEDOR")
                         .anyRequest().authenticated()
