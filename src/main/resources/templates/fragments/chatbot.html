@@ -1,0 +1,41 @@
+<th:block th:fragment="chatbot">
+    <section class="chatbot" data-chatbot
+             th:attr="data-csrf-token=${_csrf.token},data-csrf-header=${_csrf.headerName},
+                      data-message-url=@{/chat/mensaje},data-reset-url=@{/chat/reiniciar}"
+             aria-label="Chat de ayuda">
+        <button class="chatbot-launcher" type="button" data-chat-toggle
+                aria-expanded="false" aria-controls="chatbot-panel"
+                aria-label="Abrir chat de Mercadito">💬</button>
+        <section class="chatbot-panel" id="chatbot-panel" data-chat-panel
+                 aria-label="Asistente de Mercadito" hidden>
+            <header class="chatbot-header">
+                <div>
+                    <strong>Asistente Mercadito</strong>
+                    <span>¿En qué puedo ayudarte?</span>
+                </div>
+                <div class="chatbot-header-actions">
+                    <button class="chatbot-icon-button" type="button" data-chat-reset
+                            aria-label="Reiniciar conversación" title="Reiniciar">↻</button>
+                    <button class="chatbot-icon-button" type="button" data-chat-close
+                            aria-label="Cerrar chat">×</button>
+                </div>
+            </header>
+            <div class="chatbot-messages" data-chat-messages role="log"
+                 aria-live="polite" aria-relevant="additions text">
+                <p class="chatbot-message chatbot-message-bot">
+                    <span class="chatbot-bubble" data-chat-greeting>¡Hola! Puedo ayudarte a usar Mercadito.</span>
+                </p>
+            </div>
+            <p class="chatbot-status" data-chat-status aria-live="polite" hidden>Escribiendo...</p>
+            <form class="chatbot-form" data-chat-form>
+                <label class="chatbot-sr-only" for="chatbot-input">Escribe tu mensaje</label>
+                <input id="chatbot-input" class="chatbot-input" data-chat-input
+                       type="text" maxlength="1000" placeholder="Escribe tu mensaje..."
+                       autocomplete="off" required>
+                <button class="chatbot-send" type="submit" data-chat-send
+                        aria-label="Enviar mensaje">Enviar</button>
+            </form>
+        </section>
+    </section>
+    <script th:src="@{/js/chatbot.js}"></script>
+</th:block>

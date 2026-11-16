@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Acceso denegado - Marketplace</title>
+    <link rel="stylesheet" th:href="@{/css/marketplace.css}">
 </head>
 <body>
+<header th:replace="~{fragments/layout :: header('acceso-denegado')}"></header>
 <main>
     <h1>Acceso denegado</h1>
     <p>No tienes permisos para acceder a esta sección.</p>

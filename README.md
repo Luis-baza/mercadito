@@ -49,3 +49,30 @@ Ejecutar:
 
 abrir en el navegador 
 http://localhost:8080 
+
+Chat de Gemini
+
+El chat usa la Interactions API y requiere una clave de Google AI Studio. Puedes
+guardarla en `.env` en la raíz del proyecto (usa `.env.example` como referencia):
+
+`.env` debe tener formato `CLAVE=valor`, por ejemplo:
+
+```dotenv
+GEMINI_API_KEY=TU_CLAVE_DE_AI_STUDIO
+```
+
+Spring Boot carga ese archivo al iniciar. También puedes definir `GEMINI_API_KEY`
+como variable de entorno; esta tiene prioridad sobre `.env`. En PowerShell:
+
+```powershell
+$env:GEMINI_API_KEY="TU_CLAVE_DE_AI_STUDIO"
+.\mvnw.cmd spring-boot:run
+```
+
+No guardes la clave en `application.properties` ni en archivos versionados.
+El modelo, endpoint, revisión REST y límite de caracteres
+se pueden configurar con `GEMINI_MODEL`, `GEMINI_BASE_URL`,
+`GEMINI_API_REVISION` y las propiedades `gemini.*` correspondientes.
+
+La conversación usa `previous_interaction_id`; Gemini conserva el estado de
+interacciones según la política de retención de tu proyecto en AI Studio.
